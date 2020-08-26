@@ -16,15 +16,19 @@ def do_deploy(archive_path):
     else:
         return False
 
-    tarball = archive_path.split('/')[1]
-    filename = tarball.split('.')[0]
+    tarsplit = archive_path.split('/')
+    tarball = tarsplit[-1]
+    basename = tarball[:-4]
 
-    run('mkdir -p web_static/releases/{}/'.format(filename))
-    run('tar -xzf /tmp/{} -C web_static/releases/{}/'
-        .format(tarball, filename))
-    run('rm -rf /tmp/{}'.format(tarball))
-    run('rm /data/web_static/current')
-    run('ln -s /data/web_static/releases/{}/\
-        /data/web_static/current/'.format(filename))
+    run('mkdir -p /data/web_static/releases/{}/'.format(basename))
+    run('tar -xzf /tmp/{} -C /data/web_static/releases/{}/'
+        .format(tarball, basename))
+    run('rm /tmp/{}'.format(tarball))
+    run('mv /data/web_static/releases/{}/web_static/* \
+        /data/web_static/releases/{}'.format(basename, basename))
+    run('rm -rf /data/web_static/releases/{}/web_static'.format(basename))
+    run('rm -rf /data/web_static/current')
+    run('ln -sf /data/web_static/releases/{}/ \
+        /data/web_static/current'.format(basename))
 
     return True
